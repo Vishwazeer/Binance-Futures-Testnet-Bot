@@ -93,6 +93,53 @@ def place_new_order():
     except Exception as e:
         return jsonify({"status": "error", "message": f"Order execution failed: {str(e)}"}), 500
 
+@app.route("/api/account", methods=["GET"])
+def get_account_details():
+    """Fetches balance, non-zero assets, and open positions from Binance."""
+    try:
+        client = get_client()
+        data = client.get_account_info()
+        
+        # Filter assets with positive balances or active margins
+        assets = []
+        for a in data.get("assets", []):
+            wallet_bal = float(a.get("walletBalance", 0))
+            unrealized_pnl = float(a.get("unrealizedProfit", 0))
+            available_bal = float(a.get("availableBalance", 0))
+            if wallet_bal > 0 or unrealized_pnl != 0 or available_bal > 0:
+                assets.append({
+                    "asset": a.get("asset"),
+                    "walletBalance": wallet_bal,
+                    "unrealizedProfit": unrealized_pnl,
+                    "availableBalance": available_bal,
+                })
+                
+        # Filter active positions (positionAmt != 0)
+        positions = []
+        for p in data.get("positions", []):
+            amt = float(p.get("positionAmt", 0))
+            if amt != 0:
+                positions.append({
+                    "symbol": p.get("symbol"),
+                    "positionAmt": amt,
+                    "entryPrice": float(p.get("entryPrice", 0)),
+                    "unrealizedProfit": float(p.get("unrealizedProfit", 0)),
+                    "leverage": int(p.get("leverage", 20)),
+                    "isolated": p.get("isolated", False)
+                })
+                
+        return jsonify({
+            "status": "success",
+            "walletBalance": float(data.get("totalWalletBalance", 0)),
+            "marginBalance": float(data.get("totalMarginBalance", 0)),
+            "availableBalance": float(data.get("availableBalance", 0)),
+            "unrealizedProfit": float(data.get("totalUnrealizedProfit", 0)),
+            "assets": assets,
+            "positions": positions
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Failed to fetch account info: {str(e)}"}), 500
+
 def open_browser():
     """Autolaunches the user's default browser to localhost."""
     webbrowser.open("http://127.0.0.1:5000")

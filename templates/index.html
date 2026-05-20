@@ -452,6 +452,192 @@
             word-break: break-word;
         }
 
+        /* Portfolio Panel Styling */
+        .dashboard-portfolio {
+            border-top: 1px solid var(--border-color);
+            background-color: rgba(30, 34, 53, 0.2);
+            padding: 2.5rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .portfolio-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .portfolio-header h2 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: var(--text-light);
+            text-transform: uppercase;
+        }
+
+        .portfolio-header-icon {
+            font-size: 1.25rem;
+        }
+
+        .sync-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .btn-sync {
+            background-color: rgba(15, 17, 23, 0.6);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .btn-sync:hover {
+            border-color: var(--accent-blue);
+            transform: rotate(180deg);
+            box-shadow: 0 0 10px var(--glow-blue);
+        }
+
+        .btn-sync:active {
+            transform: scale(0.9) rotate(180deg);
+        }
+
+        /* Portfolio Cards Grid */
+        .portfolio-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .portfolio-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .portfolio-stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-card {
+            background-color: rgba(15, 17, 23, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(74, 158, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-currency {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--text-dimmed);
+            letter-spacing: 0.5px;
+        }
+
+        /* Portfolio tables structure */
+        .portfolio-tables-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .portfolio-tables-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        .table-container {
+            background-color: rgba(15, 17, 23, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .table-title {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--violet-color);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .portfolio-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .portfolio-table th {
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-muted);
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .portfolio-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(30, 34, 53, 0.4);
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-light);
+        }
+
+        .portfolio-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .portfolio-table tbody tr:hover td {
+            background-color: rgba(30, 34, 53, 0.2);
+        }
+
         /* Footer Info */
         .dashboard-footer {
             padding: 1rem 2rem;
@@ -606,6 +792,90 @@
             </section>
         </div>
 
+        <!-- PORTFOLIO SECTION -->
+        <section class="dashboard-portfolio">
+            <div class="portfolio-header">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span class="portfolio-header-icon">📊</span>
+                    <h2>Portfolio & Live Positions</h2>
+                </div>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span id="portfolioSyncLabel" class="sync-time">Last synced: —</span>
+                    <button class="btn-sync" onclick="fetchPortfolio()" title="Sync Portfolio">
+                        <span id="syncIcon">🔄</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Portfolio Stats Cards -->
+            <div class="portfolio-stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">WALLET BALANCE</span>
+                    <span id="statWalletBalance" class="stat-value">—</span>
+                    <span class="stat-currency">USDT</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">MARGIN BALANCE</span>
+                    <span id="statMarginBalance" class="stat-value">—</span>
+                    <span class="stat-currency">USDT</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">AVAILABLE BALANCE</span>
+                    <span id="statAvailableBalance" class="stat-value">—</span>
+                    <span class="stat-currency">USDT</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">UNREALIZED PNL</span>
+                    <span id="statUnrealizedProfit" class="stat-value">—</span>
+                    <span class="stat-currency">USDT</span>
+                </div>
+            </div>
+
+            <!-- Detailed Grid: Balances & Positions -->
+            <div class="portfolio-tables-grid">
+                <!-- Assets column -->
+                <div class="table-container">
+                    <h3 class="table-title">Asset Balances</h3>
+                    <table class="portfolio-table">
+                        <thead>
+                            <tr>
+                                <th>Asset</th>
+                                <th style="text-align: right;">Wallet Bal</th>
+                                <th style="text-align: right;">Available</th>
+                                <th style="text-align: right;">Unrealized PnL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assetsTableBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: var(--text-dimmed); padding: 2rem 0;">Loading balances...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Positions column -->
+                <div class="table-container">
+                    <h3 class="table-title">Active Positions</h3>
+                    <table class="portfolio-table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th style="text-align: right;">Size</th>
+                                <th style="text-align: right;">Entry Price</th>
+                                <th style="text-align: right;">Unrealized PnL</th>
+                                <th style="text-align: center;">Leverage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="positionsTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-dimmed); padding: 2rem 0;">No active positions.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
         <!-- FOOTER -->
         <footer class="dashboard-footer">
             <span>Client Platform: Binance Futures Testnet</span>
@@ -620,7 +890,97 @@
         // Auto-ping server at startup
         document.addEventListener("DOMContentLoaded", () => {
             pingServer(true); // silent initial check
+            fetchPortfolio(); // Load portfolio at startup
+            
+            // Periodically sync portfolio every 10 seconds
+            setInterval(fetchPortfolio, 10000);
         });
+
+        async function fetchPortfolio() {
+            const syncIcon = document.getElementById("syncIcon");
+            if (syncIcon) {
+                syncIcon.style.display = "inline-block";
+                syncIcon.style.animation = "spin 1.5s linear infinite";
+            }
+
+            try {
+                const response = await fetch("/api/account");
+                const result = await response.json();
+
+                if (response.ok && result.status === "success") {
+                    // Update Stats
+                    document.getElementById("statWalletBalance").innerText = formatUSDT(result.walletBalance);
+                    document.getElementById("statMarginBalance").innerText = formatUSDT(result.marginBalance);
+                    document.getElementById("statAvailableBalance").innerText = formatUSDT(result.availableBalance);
+                    
+                    const unrealizedProfit = result.unrealizedProfit;
+                    const pnlElem = document.getElementById("statUnrealizedProfit");
+                    pnlElem.innerText = (unrealizedProfit >= 0 ? "+" : "") + formatUSDT(unrealizedProfit);
+                    pnlElem.style.color = unrealizedProfit >= 0 ? "var(--green-success)" : "var(--red-error)";
+
+                    // Update Assets Table
+                    const assetsTableBody = document.getElementById("assetsTableBody");
+                    if (result.assets.length === 0) {
+                        assetsTableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-dimmed); padding: 1.5rem 0;">No active assets.</td></tr>`;
+                    } else {
+                        assetsTableBody.innerHTML = result.assets.map(a => `
+                            <tr>
+                                <td style="font-weight: 600; color: var(--accent-blue);">${a.asset}</td>
+                                <td style="text-align: right;">${formatNumber(a.walletBalance)}</td>
+                                <td style="text-align: right; color: var(--text-muted);">${formatNumber(a.availableBalance)}</td>
+                                <td style="text-align: right; font-weight: 500; color: ${a.unrealizedProfit >= 0 ? 'var(--green-success)' : 'var(--red-error)'};">
+                                    ${a.unrealizedProfit >= 0 ? '+' : ''}${formatNumber(a.unrealizedProfit)}
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+
+                    // Update Positions Table
+                    const positionsTableBody = document.getElementById("positionsTableBody");
+                    if (result.positions.length === 0) {
+                        positionsTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-dimmed); padding: 1.5rem 0;">No active positions.</td></tr>`;
+                    } else {
+                        positionsTableBody.innerHTML = result.positions.map(p => `
+                            <tr>
+                                <td style="font-weight: 600; color: var(--violet-color);">${p.symbol}</td>
+                                <td style="text-align: right; color: ${p.positionAmt >= 0 ? 'var(--green-success)' : 'var(--red-error)'}; font-weight: bold;">
+                                    ${p.positionAmt >= 0 ? 'BUY' : 'SELL'} ${Math.abs(p.positionAmt)}
+                                </td>
+                                <td style="text-align: right; color: var(--text-muted);">${formatNumber(p.entryPrice)}</td>
+                                <td style="text-align: right; font-weight: 500; color: ${p.unrealizedProfit >= 0 ? 'var(--green-success)' : 'var(--red-error)'};">
+                                    ${p.unrealizedProfit >= 0 ? '+' : ''}${formatNumber(p.unrealizedProfit)}
+                                </td>
+                                <td style="text-align: center;"><span style="background-color: rgba(196, 181, 253, 0.1); border: 1px solid var(--violet-color); padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.75rem;">${p.leverage}x</span></td>
+                            </tr>
+                        `).join('');
+                    }
+
+                    // Update Sync Label
+                    const now = new Date();
+                    const pad = (n) => n.toString().padStart(2, '0');
+                    document.getElementById("portfolioSyncLabel").innerText = `Last synced: ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+                }
+            } catch (err) {
+                console.error("Failed to fetch account info:", err);
+            } finally {
+                if (syncIcon) {
+                    setTimeout(() => {
+                        syncIcon.style.animation = "";
+                    }, 500);
+                }
+            }
+        }
+
+        function formatUSDT(value) {
+            return parseFloat(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatNumber(value) {
+            const num = parseFloat(value);
+            if (isNaN(num)) return "0.00";
+            if (Math.abs(num) < 0.0001) return num.toString();
+            return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+        }
 
         function setSide(side) {
             currentSide = side;
@@ -734,6 +1094,7 @@
 
                 if (response.ok && result.status === "success") {
                     showReceipt(result.data);
+                    fetchPortfolio(); // Sync portfolio immediately after placing order
                 } else {
                     showError("API Submission Error", result.message || "Order rejected by exchange.");
                 }

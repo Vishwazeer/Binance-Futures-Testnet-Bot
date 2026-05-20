@@ -101,3 +101,18 @@ class BinanceClient:
         except requests.RequestException as e:
             logger.error("Network error: %s", e)
             raise
+
+    def get_account_info(self) -> dict[str, Any]:
+        """Fetches comprehensive account details, assets, and positions."""
+        endpoint = f"{BASE_URL}/fapi/v2/account"
+        signed = self._sign({})
+        logger.debug("REQUEST → GET %s", endpoint)
+        try:
+            resp = self.session.get(endpoint, params=signed, timeout=10)
+            resp.raise_for_status()
+            data = resp.json()
+            logger.debug("RESPONSE ← Account details loaded successfully.")
+            return data
+        except requests.RequestException as e:
+            logger.error("Failed to fetch account info: %s", e)
+            raise
