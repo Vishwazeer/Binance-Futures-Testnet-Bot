@@ -1,17 +1,18 @@
-# Binance Futures Testnet Trading Bot CLI
+# Binance Futures Testnet Trading Bot
 
-An aesthetic, high-performance terminal trading bot designed for the **Binance Futures Testnet**. Built using Python with a robust multi-handler logger, input validation, HMAC query-string signing, and a premium navy-dark fintech terminal interface powered by `Typer` and `Rich`.
+An aesthetic, high-performance local trading bot and interactive web dashboard designed for the **Binance Futures Testnet**. Built using Python with a robust multi-handler logger, input validation, HMAC query-string signing, and a premium navy-dark fintech terminal interface powered by `Typer` and `Rich`, alongside a modern Flask Web GUI.
 
 ---
 
 ## Technical Features & Highlights
 
-1. **Modern Binance API Integration**: Implements the latest **December 2025 Binance Migration** which routes conditional orders (`STOP_MARKET`) to the mandatory dedicated **Algo Order Service** (`/fapi/v1/algoOrder`), automatically bridging response payloads to standard order receipt fields.
-2. **Fail-Fast Validation**: Intercepts incorrect trading symbols, side directions, order types, negative quantities, or missing limit/stop prices on the client side before issuing signed requests.
-3. **Dual File Logging**:
+1. **Interactive Web GUI Dashboard**: A lightweight local Single Page Application (SPA) with automatic browser launching, real-time diagnostic checks, responsive input forms, and dynamic order receipt ticket generators.
+2. **Modern Binance API Integration**: Implements the latest **December 2025 Binance Migration** which routes conditional orders (`STOP_MARKET`) to the mandatory dedicated **Algo Order Service** (`/fapi/v1/algoOrder`), automatically bridging response payloads to standard order receipt fields.
+3. **Fail-Fast Validation**: Intercepts incorrect trading symbols, side directions, order types, negative quantities, or missing limit/stop prices on the client side before issuing signed requests.
+4. **Dual File Logging**:
    - `logs/trading.log`: Stores comprehensive historical diagnostic data (`DEBUG` and up).
    - `logs/errors.log`: Stores all HTTP exceptions, connection problems, and validation errors (`ERROR` and up).
-4. **Navy-Dark Terminal Theme**: Customized UI styled with HSL harmonized navy-dark tokens for values, order tags, status indicators, and success borders.
+5. **Navy-Dark Stylesheet Theme**: Beautiful HSL harmonized navy-dark tokens for values, order tags, status indicators, and success borders applied consistently on the CLI and Web Dashboard.
 
 ---
 
@@ -26,10 +27,13 @@ trading_bot/
 │   ├── validators.py      ← fail-fast client input validation
 │   ├── theme.py           ← custom navy-dark console stylesheet
 │   └── logging_config.py  ← multi-handler file + stdout log configuration
+├── templates/
+│   └── index.html         ← [NEW] Web GUI Dashboard layout & script logic
 ├── logs/
 │   ├── trading.log        ← persistent diagnostic actions (DEBUG+)
 │   └── errors.log         ← persistent execution failures (ERROR+)
 ├── cli.py                 ← Typer command-line entry point
+├── gui.py                 ← [NEW] Local Flask web server & browser opener
 ├── .env                   ← Git-ignored local API credentials
 ├── .env.example           ← Local environment variables template
 ├── README.md              ← Setup and user instruction guide
@@ -85,9 +89,19 @@ API_SECRET=your_actual_binance_testnet_api_secret
 
 ---
 
+## Running the Web GUI (Easiest for Beginners!)
+
+Spin up the local web server and automatically open the trading dashboard in your default browser:
+```bash
+python gui.py
+```
+This runs the application locally at `http://127.0.0.1:5000` with an interactive, gorgeous dashboard.
+
+---
+
 ## CLI Usage Instructions
 
-To view options and commands, run:
+To view options and commands in the terminal, run:
 ```bash
 python cli.py --help
 ```
@@ -121,6 +135,6 @@ python cli.py order --symbol BTCUSDT --side SELL --type STOP_MARKET --quantity 0
 
 ## Troubleshooting & Verification
 
-* **Invalid API Credentials**: If you see `[!] API Credentials Missing`, verify that `.env` is located in the same directory where you execute the CLI, and that the values match those on the Binance Testnet dashboard.
+* **Invalid API Credentials**: If you see configuration failures, verify that `.env` is located in the same directory where you execute the server, and that the values match those on the Binance Testnet dashboard.
 * **Insufficient Margin**: If orders fail with HTTP status `400`, verify your testnet account balance. Go to [testnet.binancefuture.com](https://testnet.binancefuture.com) and click **Faucet** to fund your account.
-* **Logs Directory**: All requests are appended to `logs/trading.log`. You can tail the log to watch interactions in real-time.
+* **Logs Directory**: All requests are appended to `logs/trading.log`. You can open this file to monitor incoming and outgoing messages.

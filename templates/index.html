@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binance Futures Testnet Trading Dashboard</title>
+    <!-- Modern Premium Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Modern CSS Reset & HSL Palette Variables */
+        :root {
+            --bg-color: #0f1117;
+            --surface-color: #1a1d27;
+            --border-color: #1e2235;
+            --accent-blue: #4a9eff;
+            --violet-color: #c4b5fd;
+            --green-success: #34d399;
+            --red-error: #f87171;
+            --amber-warn: #fbbf24;
+            --text-muted: #94a3b8;
+            --text-dimmed: #4a506a;
+            --text-light: #f8fafc;
+            
+            --glow-blue: rgba(74, 158, 255, 0.15);
+            --glow-green: rgba(52, 211, 153, 0.15);
+            --glow-red: rgba(248, 113, 113, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1rem;
+            background-image: radial-gradient(circle at 10% 20%, rgba(74, 158, 255, 0.05) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(196, 181, 253, 0.05) 0%, transparent 40%);
+        }
+
+        /* Core Layout Card */
+        .dashboard-container {
+            width: 100%;
+            max-width: 900px;
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Title Bar */
+        .dashboard-header {
+            padding: 1.5rem 2rem;
+            background-color: rgba(30, 34, 53, 0.4);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-icon {
+            width: 12px;
+            height: 12px;
+            background-color: var(--accent-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-blue);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); box-shadow: 0 0 4px var(--accent-blue); }
+            50% { transform: scale(1.1); box-shadow: 0 0 12px var(--accent-blue); }
+            100% { transform: scale(0.9); box-shadow: 0 0 4px var(--accent-blue); }
+        }
+
+        .header-brand h1 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: var(--text-light);
+            text-transform: uppercase;
+        }
+
+        /* Status Widget */
+        .status-widget {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background-color: rgba(15, 17, 23, 0.6);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--text-dimmed);
+        }
+
+        .status-dot.online { background-color: var(--green-success); box-shadow: 0 0 8px var(--green-success); }
+        .status-dot.offline { background-color: var(--red-error); box-shadow: 0 0 8px var(--red-error); }
+        .status-dot.checking { background-color: var(--amber-warn); box-shadow: 0 0 8px var(--amber-warn); }
+
+        .status-text {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .btn-ping {
+            background: none;
+            border: none;
+            color: var(--accent-blue);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+            transition: color 0.2s;
+        }
+
+        .btn-ping:hover {
+            color: var(--violet-color);
+        }
+
+        /* Main panels layout */
+        .dashboard-body {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            min-height: 520px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-body {
+                grid-template-columns: 1fr;
+            }
+            .panel-right {
+                border-left: none !important;
+                border-top: 1px solid var(--border-color);
+            }
+        }
+
+        /* Left Form Panel */
+        .panel-left {
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .form-title {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Select/Text Fields styling */
+        .form-select, .form-input {
+            width: 100%;
+            background-color: rgba(15, 17, 23, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-select:focus, .form-input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 15px var(--glow-blue);
+        }
+
+        /* Side Custom Toggle Buttons */
+        .side-toggle-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-side {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: rgba(15, 17, 23, 0.4);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-side.buy-active {
+            background-color: rgba(52, 211, 153, 0.1);
+            border-color: var(--green-success);
+            color: var(--green-success);
+            box-shadow: 0 0 15px var(--glow-green);
+        }
+
+        .btn-side.sell-active {
+            background-color: rgba(248, 113, 113, 0.1);
+            border-color: var(--red-error);
+            color: var(--red-error);
+            box-shadow: 0 0 15px var(--glow-red);
+        }
+
+        /* Sliding price panel */
+        .price-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .price-section.visible {
+            max-height: 100px;
+        }
+
+        /* Submit Button */
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #2563eb 100%);
+            border: none;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Right Receipt Panel */
+        .panel-right {
+            border-left: 1px solid var(--border-color);
+            background-color: rgba(15, 17, 23, 0.3);
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .receipt-header {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--violet-color);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 2rem;
+        }
+
+        /* Receipt Canvas Ticket */
+        .receipt-ticket {
+            flex-grow: 1;
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            background-color: rgba(15, 17, 23, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            min-height: 300px;
+        }
+
+        .receipt-ticket::before, .receipt-ticket::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: var(--surface-color);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .receipt-ticket::before { left: -11px; border-right: 1px dashed var(--border-color); }
+        .receipt-ticket::after { right: -11px; border-left: 1px dashed var(--border-color); }
+
+        .ticket-placeholder {
+            color: var(--text-dimmed);
+        }
+
+        .ticket-placeholder-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Realized Ticket details */
+        .ticket-receipt-details {
+            width: 100%;
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .ticket-success-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            padding: 0.25rem 0.75rem;
+            border-radius: 30px;
+            background-color: rgba(52, 211, 153, 0.1);
+            color: var(--green-success);
+            border: 1px solid var(--green-success);
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+
+        .ticket-details-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        .ticket-details-table tr {
+            border-bottom: 1px solid rgba(30, 34, 53, 0.4);
+        }
+
+        .ticket-details-table tr:last-child {
+            border-bottom: none;
+        }
+
+        .ticket-details-table td {
+            padding: 0.75rem 0;
+            text-align: left;
+        }
+
+        .ticket-details-table td:first-child {
+            color: var(--text-muted);
+            width: 40%;
+        }
+
+        .ticket-details-table td:last-child {
+            color: var(--violet-color);
+            text-align: right;
+            font-weight: 500;
+        }
+
+        /* Side coloration inside table */
+        .ticket-details-table .val-buy { color: var(--green-success) !important; font-weight: bold; }
+        .ticket-details-table .val-sell { color: var(--red-error) !important; font-weight: bold; }
+        .ticket-details-table .val-id { color: var(--text-light) !important; }
+
+        /* Error box styling */
+        .error-message-box {
+            width: 100%;
+            padding: 1.25rem;
+            border-radius: 8px;
+            background-color: rgba(248, 113, 113, 0.08);
+            border: 1px solid var(--red-error);
+            color: var(--text-light);
+            text-align: left;
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .error-title {
+            color: var(--red-error);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .error-body {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        /* Footer Info */
+        .dashboard-footer {
+            padding: 1rem 2rem;
+            border-top: 1px solid var(--border-color);
+            background-color: rgba(15, 17, 23, 0.4);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-dimmed);
+        }
+
+        .footer-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-link:hover {
+            color: var(--accent-blue);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- HEADER -->
+        <header class="dashboard-header">
+            <div class="header-brand">
+                <div class="header-icon"></div>
+                <h1>Antigravity Terminal</h1>
+            </div>
+            
+            <div class="status-widget">
+                <div id="statusDot" class="status-dot"></div>
+                <span id="statusLabel" class="status-text">DISCONNECTED</span>
+                <button id="btnPing" class="btn-ping" onclick="pingServer()">Test Connection</button>
+            </div>
+        </header>
+
+        <!-- BODY PANELS -->
+        <div class="dashboard-body">
+            <!-- LEFT PANEL: FORM -->
+            <section class="panel-left">
+                <div>
+                    <h2 class="form-title">Order Dispatcher</h2>
+                    
+                    <!-- Side Selection -->
+                    <div class="input-group">
+                        <label class="input-label">Order Side</label>
+                        <div class="side-toggle-container">
+                            <button type="button" id="btnBuy" class="btn-side buy-active" onclick="setSide('BUY')">BUY</button>
+                            <button type="button" id="btnSell" class="btn-side" onclick="setSide('SELL')">SELL</button>
+                        </div>
+                    </div>
+
+                    <!-- Symbol Selector -->
+                    <div class="input-group">
+                        <label for="symbol" class="input-label">Asset Pair</label>
+                        <select id="symbol" class="form-select">
+                            <option value="BTCUSDT" selected>BTCUSDT (Bitcoin)</option>
+                            <option value="ETHUSDT">ETHUSDT (Ethereum)</option>
+                            <option value="BNBUSDT">BNBUSDT (Binance Coin)</option>
+                        </select>
+                    </div>
+
+                    <!-- Order Type Selector -->
+                    <div class="input-group">
+                        <label for="orderType" class="input-label">Order Type</label>
+                        <select id="orderType" class="form-select" onchange="togglePriceField()">
+                            <option value="MARKET" selected>MARKET</option>
+                            <option value="LIMIT">LIMIT</option>
+                            <option value="STOP_MARKET">STOP_MARKET</option>
+                        </select>
+                    </div>
+
+                    <!-- Quantity Input -->
+                    <div class="input-group">
+                        <label for="quantity" class="input-label">Quantity</label>
+                        <input type="number" id="quantity" class="form-input" placeholder="e.g. 0.001" step="any" required>
+                    </div>
+
+                    <!-- Price Input (Sliding) -->
+                    <div id="priceGroup" class="input-group price-section">
+                        <label for="price" id="priceLabel" class="input-label">Price</label>
+                        <input type="number" id="price" class="form-input" placeholder="e.g. 58000" step="any">
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="button" id="btnSubmit" class="btn-submit" onclick="submitOrder()">
+                    <div id="submitSpinner" class="spinner"></div>
+                    <span id="submitBtnText">Place Order</span>
+                </button>
+            </section>
+
+            <!-- RIGHT PANEL: TICKET -->
+            <section class="panel-right">
+                <h2 class="receipt-header">Order Receipt</h2>
+                
+                <!-- Ticket Canvas -->
+                <div class="receipt-ticket">
+                    <!-- Placeholder -->
+                    <div id="ticketPlaceholder" class="ticket-placeholder">
+                        <div class="ticket-placeholder-icon">🎫</div>
+                        <p style="font-weight: 600; margin-bottom: 0.25rem;">No Order Placed</p>
+                        <p style="font-size: 0.8rem; color: var(--text-dimmed);">Configure your trade and dispatch the order to view the execution ticket.</p>
+                    </div>
+
+                    <!-- Receipt Details Table -->
+                    <div id="ticketDetails" class="ticket-receipt-details">
+                        <div class="ticket-success-badge">FILLED</div>
+                        
+                        <table class="ticket-details-table">
+                            <tr>
+                                <td>Order ID</td>
+                                <td id="rOrderId" class="val-id">—</td>
+                            </tr>
+                            <tr>
+                                <td>Symbol</td>
+                                <td id="rSymbol">—</td>
+                            </tr>
+                            <tr>
+                                <td>Side</td>
+                                <td id="rSide">—</td>
+                            </tr>
+                            <tr>
+                                <td>Type</td>
+                                <td id="rType">—</td>
+                            </tr>
+                            <tr>
+                                <td>Status</td>
+                                <td id="rStatus">—</td>
+                            </tr>
+                            <tr>
+                                <td>Client Order ID</td>
+                                <td id="rClientOrderId" style="font-size:0.75rem; color:var(--text-muted);">—</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Error Box -->
+                    <div id="ticketError" class="error-message-box">
+                        <div class="error-title">
+                            <span>⚠</span> Order Failure
+                        </div>
+                        <div id="errorBodyText" class="error-body">
+                            Validation failed.
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="dashboard-footer">
+            <span>Client Platform: Binance Futures Testnet</span>
+            <span>Local GUI Server: <a href="http://127.0.0.1:5000" class="footer-link" target="_blank">http://127.0.0.1:5000</a></span>
+        </footer>
+    </div>
+
+    <!-- Interactive JS Controller -->
+    <script>
+        let currentSide = 'BUY';
+
+        // Auto-ping server at startup
+        document.addEventListener("DOMContentLoaded", () => {
+            pingServer(true); // silent initial check
+        });
+
+        function setSide(side) {
+            currentSide = side;
+            const btnBuy = document.getElementById("btnBuy");
+            const btnSell = document.getElementById("btnSell");
+            
+            if (side === 'BUY') {
+                btnBuy.classList.add("buy-active");
+                btnSell.classList.remove("sell-active");
+            } else {
+                btnBuy.classList.remove("buy-active");
+                btnSell.classList.add("sell-active");
+            }
+        }
+
+        function togglePriceField() {
+            const orderType = document.getElementById("orderType").value;
+            const priceGroup = document.getElementById("priceGroup");
+            const priceLabel = document.getElementById("priceLabel");
+            const priceInput = document.getElementById("price");
+
+            if (orderType === 'LIMIT') {
+                priceLabel.innerText = "Limit Price (USDT)";
+                priceInput.placeholder = "e.g. 3200";
+                priceGroup.classList.add("visible");
+                priceInput.required = true;
+            } else if (orderType === 'STOP_MARKET') {
+                priceLabel.innerText = "Stop Trigger Price (USDT)";
+                priceInput.placeholder = "e.g. 58000";
+                priceGroup.classList.add("visible");
+                priceInput.required = true;
+            } else {
+                priceGroup.classList.remove("visible");
+                priceInput.required = false;
+                priceInput.value = "";
+            }
+        }
+
+        async function pingServer(silent = false) {
+            const dot = document.getElementById("statusDot");
+            const label = document.getElementById("statusLabel");
+            
+            dot.className = "status-dot checking";
+            label.innerText = "CHECKING...";
+
+            try {
+                const response = await fetch("/api/ping");
+                const result = await response.json();
+                
+                if (response.ok) {
+                    dot.className = "status-dot online";
+                    label.innerText = "ONLINE";
+                } else {
+                    dot.className = "status-dot offline";
+                    label.innerText = "CONFIG ERROR";
+                    if (!silent) {
+                        alert(result.message || "Failed to communicate with Binance Futures Testnet.");
+                    }
+                }
+            } catch (err) {
+                dot.className = "status-dot offline";
+                label.innerText = "OFFLINE";
+                if (!silent) {
+                    alert("Unable to reach local Flask server. Ensure Python is running gui.py.");
+                }
+            }
+        }
+
+        async function submitOrder() {
+            const btnSubmit = document.getElementById("btnSubmit");
+            const spinner = document.getElementById("submitSpinner");
+            const text = document.getElementById("submitBtnText");
+            
+            const symbol = document.getElementById("symbol").value;
+            const type = document.getElementById("orderType").value;
+            const quantity = document.getElementById("quantity").value;
+            const price = document.getElementById("price").value;
+
+            // Simple client check
+            if (!quantity || parseFloat(quantity) <= 0) {
+                showError("Validation Error", "Quantity must be greater than 0.");
+                return;
+            }
+            if ((type === 'LIMIT' || type === 'STOP_MARKET') && (!price || parseFloat(price) <= 0)) {
+                showError("Validation Error", `Price is a required positive number for ${type} orders.`);
+                return;
+            }
+
+            // Start loading state
+            btnSubmit.disabled = true;
+            spinner.style.display = "block";
+            text.innerText = "Executing...";
+
+            // Clear right panel
+            hideOutputs();
+
+            try {
+                const response = await fetch("/api/order", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        symbol: symbol,
+                        side: currentSide,
+                        type: type,
+                        quantity: quantity,
+                        price: price
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === "success") {
+                    showReceipt(result.data);
+                } else {
+                    showError("API Submission Error", result.message || "Order rejected by exchange.");
+                }
+
+            } catch (err) {
+                showError("Connection Error", "Failed to communicate with local server. Ensure server is running.");
+            } finally {
+                // End loading state
+                btnSubmit.disabled = false;
+                spinner.style.display = "none";
+                text.innerText = "Place Order";
+            }
+        }
+
+        function hideOutputs() {
+            document.getElementById("ticketPlaceholder").style.display = "none";
+            document.getElementById("ticketDetails").style.display = "none";
+            document.getElementById("ticketError").style.display = "none";
+        }
+
+        function showReceipt(data) {
+            hideOutputs();
+            
+            document.getElementById("rOrderId").innerText = data.orderId || "—";
+            document.getElementById("rSymbol").innerText = data.symbol || "—";
+            
+            const rSide = document.getElementById("rSide");
+            rSide.innerText = data.side || "—";
+            rSide.className = data.side === 'BUY' ? 'val-buy' : 'val-sell';
+
+            document.getElementById("rType").innerText = data.type || "—";
+            
+            const rStatus = document.getElementById("rStatus");
+            rStatus.innerText = data.status || "—";
+            rStatus.style.color = (data.status === 'NEW' || data.status === 'FILLED' || data.status.includes('ALGO')) ? 'var(--green-success)' : 'var(--amber-warn)';
+
+            document.getElementById("rClientOrderId").innerText = data.clientOrderId || "—";
+
+            // Update badge text dynamically
+            const badge = document.querySelector(".ticket-success-badge");
+            badge.innerText = data.status.includes('ALGO') ? "NEW (ALGO)" : "FILLED";
+
+            document.getElementById("ticketDetails").style.display = "block";
+        }
+
+        function showError(title, message) {
+            hideOutputs();
+            document.getElementById("errorBodyText").innerText = message;
+            document.getElementById("ticketError").style.display = "block";
+        }
+    </script>
+</body>
+</html>
