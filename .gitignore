@@ -1,0 +1,10 @@
+# Virtualenv
+.venv/
+__pycache__/
+*.pyc
+
+# Logs
+logs/
+
+# Sensitive Environment Variables
+.env
