@@ -659,6 +659,96 @@
         .footer-link:hover {
             color: var(--accent-blue);
         }
+
+        /* Tickers Ribbon */
+        .tickers-ribbon {
+            display: flex;
+            background-color: rgba(15, 17, 23, 0.85);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.6rem 2rem;
+            justify-content: space-around;
+            align-items: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .ticker-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            background-color: rgba(30, 34, 53, 0.2);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .ticker-symbol {
+            font-weight: 800;
+            color: var(--text-muted);
+        }
+
+        .ticker-price {
+            font-weight: 700;
+            color: var(--text-light);
+            transition: all 0.2s ease;
+        }
+
+        .ticker-arrow {
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .price-up {
+            color: var(--green-success) !important;
+            text-shadow: 0 0 8px var(--glow-green);
+        }
+
+        .price-down {
+            color: var(--red-error) !important;
+            text-shadow: 0 0 8px var(--glow-red);
+        }
+
+        /* Action Buttons */
+        .btn-close-pos {
+            background-color: rgba(248, 113, 113, 0.12);
+            border: 1px solid var(--red-error);
+            color: var(--red-error);
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-close-pos:hover {
+            background-color: var(--red-error);
+            color: white;
+            box-shadow: 0 0 10px var(--glow-red);
+            transform: translateY(-1px);
+        }
+
+        .btn-cancel-order {
+            background-color: rgba(251, 191, 36, 0.12);
+            border: 1px solid var(--amber-warn);
+            color: var(--amber-warn);
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel-order:hover {
+            background-color: var(--amber-warn);
+            color: black;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
@@ -668,7 +758,7 @@
         <header class="dashboard-header">
             <div class="header-brand">
                 <div class="header-icon"></div>
-                <h1>Antigravity Terminal</h1>
+                <h1>Binance Futures Desk</h1>
             </div>
             
             <div class="status-widget">
@@ -677,6 +767,134 @@
                 <button id="btnPing" class="btn-ping" onclick="pingServer()">Test Connection</button>
             </div>
         </header>
+
+        <!-- TICKERS RIBBON -->
+        <div class="tickers-ribbon">
+            <div class="ticker-item" id="ticker-BTCUSDT">
+                <span class="ticker-symbol">BTCUSDT</span>
+                <span class="ticker-price" id="price-BTCUSDT">—</span>
+                <span class="ticker-arrow" id="arrow-BTCUSDT"></span>
+            </div>
+            <div class="ticker-item" id="ticker-ETHUSDT">
+                <span class="ticker-symbol">ETHUSDT</span>
+                <span class="ticker-price" id="price-ETHUSDT">—</span>
+                <span class="ticker-arrow" id="arrow-ETHUSDT"></span>
+            </div>
+            <div class="ticker-item" id="ticker-BNBUSDT">
+                <span class="ticker-symbol">BNBUSDT</span>
+                <span class="ticker-price" id="price-BNBUSDT">—</span>
+                <span class="ticker-arrow" id="arrow-BNBUSDT"></span>
+            </div>
+        </div>
+
+        <!-- PORTFOLIO SECTION (MOVED TO TOP) -->
+        <section class="dashboard-portfolio" style="border-top: none; border-bottom: 1px solid var(--border-color);">
+            <div class="portfolio-header">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span class="portfolio-header-icon">📊</span>
+                    <h2>Portfolio & Live Positions</h2>
+                </div>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span id="portfolioSyncLabel" class="sync-time">Last synced: —</span>
+                    <button class="btn-sync" onclick="fetchPortfolio()" title="Sync Portfolio">
+                        <span id="syncIcon">🔄</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Portfolio Stats Cards -->
+            <div class="portfolio-stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">WALLET BALANCE</span>
+                    <span id="statWalletBalance" class="stat-value">—</span>
+                    <span class="stat-currency">USDT</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">MARGIN BALANCE</span>
+                    <span id="statMarginBalance" class="stat-value">—</span>
+                    <span class="stat-currency">USDT</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">AVAILABLE BALANCE</span>
+                    <span id="statAvailableBalance" class="stat-value">—</span>
+                    <span class="stat-currency">USDT</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">UNREALIZED PNL</span>
+                    <span id="statUnrealizedProfit" class="stat-value">—</span>
+                    <span class="stat-currency">USDT</span>
+                </div>
+            </div>
+
+            <!-- Detailed Grid: Balances & Positions -->
+            <div class="portfolio-tables-grid">
+                <!-- Assets column -->
+                <div class="table-container">
+                    <h3 class="table-title">Asset Balances</h3>
+                    <table class="portfolio-table">
+                        <thead>
+                            <tr>
+                                <th>Asset</th>
+                                <th style="text-align: right;">Wallet Bal</th>
+                                <th style="text-align: right;">Available</th>
+                                <th style="text-align: right;">Unrealized PnL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assetsTableBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: var(--text-dimmed); padding: 2rem 0;">Loading balances...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Positions column -->
+                <div class="table-container">
+                    <h3 class="table-title">Active Positions</h3>
+                    <table class="portfolio-table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th style="text-align: right;">Size</th>
+                                <th style="text-align: right;">Entry Price</th>
+                                <th style="text-align: right;">Unrealized PnL</th>
+                                <th style="text-align: center;">Leverage</th>
+                                <th style="text-align: center;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="positionsTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: var(--text-dimmed); padding: 2rem 0;">No active positions.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Open Orders Panel -->
+            <div class="table-container" style="margin-top: 1.5rem;">
+                <h3 class="table-title">Pending & Trigger Orders</h3>
+                <table class="portfolio-table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Side</th>
+                            <th>Type</th>
+                            <th style="text-align: right;">Price / Trigger</th>
+                            <th style="text-align: right;">Quantity</th>
+                            <th style="text-align: center;">Trigger / Algo</th>
+                            <th style="text-align: center;">Status</th>
+                            <th style="text-align: center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="openOrdersTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: var(--text-dimmed); padding: 1.5rem 0;">No active pending orders.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
         <!-- BODY PANELS -->
         <div class="dashboard-body">
@@ -702,6 +920,15 @@
                             <option value="ETHUSDT">ETHUSDT (Ethereum)</option>
                             <option value="BNBUSDT">BNBUSDT (Binance Coin)</option>
                         </select>
+                    </div>
+
+                    <!-- Leverage Input -->
+                    <div class="input-group">
+                        <label for="leverageInput" class="input-label">Target Leverage (1x - 125x)</label>
+                        <div style="display: flex; gap: 0.75rem;">
+                            <input type="number" id="leverageInput" class="form-input" value="20" min="1" max="125" style="flex: 2;">
+                            <button type="button" class="btn-side" style="flex: 1; padding: 0.5rem; font-size: 0.8rem;" onclick="applyLeverageForm()">SET</button>
+                        </div>
                     </div>
 
                     <!-- Order Type Selector -->
@@ -792,90 +1019,6 @@
             </section>
         </div>
 
-        <!-- PORTFOLIO SECTION -->
-        <section class="dashboard-portfolio">
-            <div class="portfolio-header">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <span class="portfolio-header-icon">📊</span>
-                    <h2>Portfolio & Live Positions</h2>
-                </div>
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <span id="portfolioSyncLabel" class="sync-time">Last synced: —</span>
-                    <button class="btn-sync" onclick="fetchPortfolio()" title="Sync Portfolio">
-                        <span id="syncIcon">🔄</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Portfolio Stats Cards -->
-            <div class="portfolio-stats-grid">
-                <div class="stat-card">
-                    <span class="stat-label">WALLET BALANCE</span>
-                    <span id="statWalletBalance" class="stat-value">—</span>
-                    <span class="stat-currency">USDT</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-label">MARGIN BALANCE</span>
-                    <span id="statMarginBalance" class="stat-value">—</span>
-                    <span class="stat-currency">USDT</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-label">AVAILABLE BALANCE</span>
-                    <span id="statAvailableBalance" class="stat-value">—</span>
-                    <span class="stat-currency">USDT</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-label">UNREALIZED PNL</span>
-                    <span id="statUnrealizedProfit" class="stat-value">—</span>
-                    <span class="stat-currency">USDT</span>
-                </div>
-            </div>
-
-            <!-- Detailed Grid: Balances & Positions -->
-            <div class="portfolio-tables-grid">
-                <!-- Assets column -->
-                <div class="table-container">
-                    <h3 class="table-title">Asset Balances</h3>
-                    <table class="portfolio-table">
-                        <thead>
-                            <tr>
-                                <th>Asset</th>
-                                <th style="text-align: right;">Wallet Bal</th>
-                                <th style="text-align: right;">Available</th>
-                                <th style="text-align: right;">Unrealized PnL</th>
-                            </tr>
-                        </thead>
-                        <tbody id="assetsTableBody">
-                            <tr>
-                                <td colspan="4" style="text-align: center; color: var(--text-dimmed); padding: 2rem 0;">Loading balances...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Positions column -->
-                <div class="table-container">
-                    <h3 class="table-title">Active Positions</h3>
-                    <table class="portfolio-table">
-                        <thead>
-                            <tr>
-                                <th>Symbol</th>
-                                <th style="text-align: right;">Size</th>
-                                <th style="text-align: right;">Entry Price</th>
-                                <th style="text-align: right;">Unrealized PnL</th>
-                                <th style="text-align: center;">Leverage</th>
-                            </tr>
-                        </thead>
-                        <tbody id="positionsTableBody">
-                            <tr>
-                                <td colspan="5" style="text-align: center; color: var(--text-dimmed); padding: 2rem 0;">No active positions.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
         <!-- FOOTER -->
         <footer class="dashboard-footer">
             <span>Client Platform: Binance Futures Testnet</span>
@@ -886,14 +1029,17 @@
     <!-- Interactive JS Controller -->
     <script>
         let currentSide = 'BUY';
+        let previousPrices = {};
 
-        // Auto-ping server at startup
+        // Auto-ping server and poll market data at startup
         document.addEventListener("DOMContentLoaded", () => {
             pingServer(true); // silent initial check
-            fetchPortfolio(); // Load portfolio at startup
+            fetchPortfolio(); // Load portfolio & open orders at startup
+            fetchTickers();   // Load live price tickers immediately
             
-            // Periodically sync portfolio every 10 seconds
+            // Periodically sync portfolio (10s) and tickers (3s)
             setInterval(fetchPortfolio, 10000);
+            setInterval(fetchTickers, 3000);
         });
 
         async function fetchPortfolio() {
@@ -938,7 +1084,7 @@
                     // Update Positions Table
                     const positionsTableBody = document.getElementById("positionsTableBody");
                     if (result.positions.length === 0) {
-                        positionsTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-dimmed); padding: 1.5rem 0;">No active positions.</td></tr>`;
+                        positionsTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-dimmed); padding: 1.5rem 0;">No active positions.</td></tr>`;
                     } else {
                         positionsTableBody.innerHTML = result.positions.map(p => `
                             <tr>
@@ -950,7 +1096,12 @@
                                 <td style="text-align: right; font-weight: 500; color: ${p.unrealizedProfit >= 0 ? 'var(--green-success)' : 'var(--red-error)'};">
                                     ${p.unrealizedProfit >= 0 ? '+' : ''}${formatNumber(p.unrealizedProfit)}
                                 </td>
-                                <td style="text-align: center;"><span style="background-color: rgba(196, 181, 253, 0.1); border: 1px solid var(--violet-color); padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.75rem;">${p.leverage}x</span></td>
+                                <td style="text-align: center;">
+                                    <span style="background-color: rgba(196, 181, 253, 0.1); border: 1px solid var(--violet-color); padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.75rem;">${p.leverage}x</span>
+                                </td>
+                                <td style="text-align: center;">
+                                    <button class="btn-close-pos" onclick="closePosition('${p.symbol}')" title="Offset Position to Flat">CLOSE</button>
+                                </td>
                             </tr>
                         `).join('');
                     }
@@ -960,6 +1111,10 @@
                     const pad = (n) => n.toString().padStart(2, '0');
                     document.getElementById("portfolioSyncLabel").innerText = `Last synced: ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
                 }
+                
+                // Fetch and sync open pending orders at the same time
+                await fetchOpenOrders();
+
             } catch (err) {
                 console.error("Failed to fetch account info:", err);
             } finally {
@@ -968,6 +1123,157 @@
                         syncIcon.style.animation = "";
                     }, 500);
                 }
+            }
+        }
+
+        async function fetchOpenOrders() {
+            try {
+                const response = await fetch("/api/open_orders");
+                const result = await response.json();
+                
+                if (response.ok && result.status === "success") {
+                    const openOrdersTableBody = document.getElementById("openOrdersTableBody");
+                    if (result.orders.length === 0) {
+                        openOrdersTableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-dimmed); padding: 1.5rem 0;">No active pending orders.</td></tr>`;
+                    } else {
+                        openOrdersTableBody.innerHTML = result.orders.map(o => `
+                            <tr>
+                                <td style="font-weight: 600; color: var(--violet-color);">${o.symbol}</td>
+                                <td style="color: ${o.side === 'BUY' ? 'var(--green-success)' : 'var(--red-error)'}; font-weight: bold;">${o.side}</td>
+                                <td>${o.type}</td>
+                                <td style="text-align: right; font-family: 'JetBrains Mono', monospace;">${formatNumber(o.price)}</td>
+                                <td style="text-align: right; font-family: 'JetBrains Mono', monospace;">${o.quantity}</td>
+                                <td style="text-align: center;">
+                                    <span style="background-color: ${o.isAlgo ? 'rgba(74, 158, 255, 0.1)' : 'rgba(148, 163, 184, 0.1)'}; border: 1px solid ${o.isAlgo ? 'var(--accent-blue)' : 'var(--text-dimmed)'}; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.7rem; color: ${o.isAlgo ? 'var(--accent-blue)' : 'var(--text-muted)'};">
+                                        ${o.isAlgo ? 'ALGO (Stop)' : 'STANDARD'}
+                                    </span>
+                                </td>
+                                <td style="text-align: center; color: var(--amber-warn); font-size: 0.75rem;">${o.status}</td>
+                                <td style="text-align: center;">
+                                    <button class="btn-cancel-order" onclick="cancelOrder('${o.symbol}', ${o.orderId}, ${o.isAlgo})" title="Cancel Order">CANCEL</button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch open orders:", err);
+            }
+        }
+
+        async function cancelOrder(symbol, orderId, isAlgo) {
+            if (!confirm(`Are you sure you want to cancel order #${orderId}?`)) return;
+            
+            try {
+                const response = await fetch("/api/cancel_order", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ symbol, orderId, isAlgo })
+                });
+                const result = await response.json();
+                if (response.ok && result.status === "success") {
+                    fetchPortfolio(); // sync immediately
+                } else {
+                    alert(result.message || "Failed to cancel order.");
+                }
+            } catch (err) {
+                console.error("Failed to cancel order:", err);
+                alert("Connection error while attempting to cancel order.");
+            }
+        }
+
+        async function closePosition(symbol) {
+            if (!confirm(`Are you sure you want to market close your active position in ${symbol}?`)) return;
+            
+            // Clear right receipt panel
+            hideOutputs();
+            
+            try {
+                const response = await fetch("/api/close_position", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ symbol })
+                });
+                const result = await response.json();
+                if (response.ok && result.status === "success") {
+                    showReceipt(result.data);
+                    fetchPortfolio(); // sync immediately
+                } else {
+                    showError("Close Position Failure", result.message || "Failed to close position.");
+                }
+            } catch (err) {
+                console.error("Failed to close position:", err);
+                showError("Connection Error", "Failed to contact local server to close position.");
+            }
+        }
+
+        async function applyLeverageForm() {
+            const symbol = document.getElementById("symbol").value;
+            const leverageInput = document.getElementById("leverageInput");
+            const leverage = leverageInput.value;
+            
+            if (!leverage || parseInt(leverage) < 1 || parseInt(leverage) > 125) {
+                alert("Leverage must be an integer between 1 and 125.");
+                return;
+            }
+            
+            try {
+                const response = await fetch("/api/leverage", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ symbol: symbol, leverage: parseInt(leverage) })
+                });
+                const result = await response.json();
+                if (response.ok && result.status === "success") {
+                    alert(`Leverage adjusted to ${leverage}x successfully for ${symbol}!`);
+                    fetchPortfolio();
+                } else {
+                    alert(result.message || "Failed to adjust leverage.");
+                }
+            } catch (err) {
+                console.error("Failed to adjust leverage:", err);
+                alert("Connection error while adjusting leverage.");
+            }
+        }
+
+        async function fetchTickers() {
+            try {
+                const response = await fetch("/api/tickers");
+                const result = await response.json();
+                
+                if (response.ok && result.status === "success") {
+                    const prices = result.prices;
+                    for (const sym in prices) {
+                        const priceElem = document.getElementById(`price-${sym}`);
+                        const arrowElem = document.getElementById(`arrow-${sym}`);
+                        
+                        if (!priceElem) continue;
+                        
+                        const currentPrice = prices[sym];
+                        const prevPrice = previousPrices[sym];
+                        
+                        priceElem.innerText = currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        
+                        if (prevPrice !== undefined) {
+                            if (currentPrice > prevPrice) {
+                                priceElem.className = "ticker-price price-up";
+                                arrowElem.innerText = "▲";
+                                arrowElem.className = "ticker-arrow price-up";
+                            } else if (currentPrice < prevPrice) {
+                                priceElem.className = "ticker-price price-down";
+                                arrowElem.innerText = "▼";
+                                arrowElem.className = "ticker-arrow price-down";
+                            }
+                        } else {
+                            priceElem.className = "ticker-price";
+                            arrowElem.innerText = "";
+                        }
+                        
+                        previousPrices[sym] = currentPrice;
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch tickers:", err);
             }
         }
 

@@ -140,6 +140,160 @@ def get_account_details():
     except Exception as e:
         return jsonify({"status": "error", "message": f"Failed to fetch account info: {str(e)}"}), 500
 
+@app.route("/api/tickers", methods=["GET"])
+def get_tickers():
+    """Fetches public market ticker prices for dashboard display."""
+    try:
+        client = get_client()
+        tickers = client.get_ticker_prices()
+        # Filter only our valid symbols
+        valid_symbols = {"BTCUSDT", "ETHUSDT", "BNBUSDT"}
+        prices = {}
+        for t in tickers:
+            sym = t.get("symbol")
+            if sym in valid_symbols:
+                prices[sym] = float(t.get("price", 0))
+        return jsonify({"status": "success", "prices": prices})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route("/api/leverage", methods=["POST"])
+def adjust_leverage():
+    """Adjusts position leverage for a specific asset symbol."""
+    try:
+        client = get_client()
+        data = request.get_json() or {}
+        symbol = data.get("symbol", "").upper()
+        leverage = data.get("leverage")
+        
+        if not symbol or not leverage:
+            return jsonify({"status": "error", "message": "Symbol and leverage are required."}), 400
+            
+        try:
+            leverage = int(leverage)
+        except ValueError:
+            return jsonify({"status": "error", "message": "Leverage must be a valid integer."}), 400
+            
+        if leverage < 1 or leverage > 125:
+            return jsonify({"status": "error", "message": "Leverage must be between 1 and 125."}), 400
+
+        result = client.change_leverage(symbol, leverage)
+        return jsonify({"status": "success", "data": result})
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Leverage adjustment failed: {str(e)}"}), 500
+
+@app.route("/api/close_position", methods=["POST"])
+def close_active_position():
+    """Finds active position size and submits offsetting Market order to flat it."""
+    try:
+        client = get_client()
+        data = request.get_json() or {}
+        symbol = data.get("symbol", "").upper()
+        
+        if not symbol:
+            return jsonify({"status": "error", "message": "Symbol is required to close a position."}), 400
+            
+        # 1. Fetch current positions to find size
+        account_data = client.get_account_info()
+        target_pos = None
+        for p in account_data.get("positions", []):
+            if p.get("symbol", "").upper() == symbol:
+                target_pos = p
+                break
+                
+        if not target_pos:
+            return jsonify({"status": "error", "message": f"No position record found for {symbol}."}), 400
+            
+        position_amt = float(target_pos.get("positionAmt", 0))
+        if position_amt == 0:
+            return jsonify({"status": "error", "message": f"No active position exists for {symbol} (size is 0)."}), 400
+            
+        # 2. Determine offsetting side and absolute size
+        offsetting_side = "SELL" if position_amt > 0 else "BUY"
+        absolute_qty = abs(position_amt)
+        
+        logger.info("GUI initiating closing market order for %s: %s %s", symbol, offsetting_side, absolute_qty)
+        
+        # 3. Place standard offsetting MARKET order
+        result = place_order(client, symbol, offsetting_side, "MARKET", absolute_qty)
+        return jsonify({"status": "success", "message": f"Position closed successfully.", "data": result})
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Failed to close position: {str(e)}"}), 500
+
+@app.route("/api/open_orders", methods=["GET"])
+def get_open_orders_list():
+    """Aggregates all pending standard and algorithmic/stop orders."""
+    try:
+        client = get_client()
+        
+        # Fetch standard open orders
+        std_orders = []
+        try:
+            std_orders = client.get_open_orders()
+        except Exception as e:
+            logger.error("Error fetching open standard orders: %s", e)
+            
+        # Fetch open algo orders
+        algo_orders = []
+        try:
+            algo_orders = client.get_open_algo_orders()
+        except Exception as e:
+            logger.error("Error fetching open algo orders: %s", e)
+            
+        formatted_orders = []
+        
+        # Map standard open orders
+        for o in std_orders:
+            formatted_orders.append({
+                "orderId": o.get("orderId"),
+                "symbol": o.get("symbol"),
+                "side": o.get("side"),
+                "type": o.get("type"),
+                "price": float(o.get("price", 0)),
+                "quantity": float(o.get("origQty", 0)),
+                "isAlgo": False,
+                "status": o.get("status")
+            })
+            
+        # Map algorithmic orders (STOP_MARKET etc.)
+        for o in algo_orders:
+            formatted_orders.append({
+                "orderId": o.get("algoId"),
+                "symbol": o.get("symbol"),
+                "side": o.get("side"),
+                "type": o.get("type"),
+                "price": float(o.get("triggerPrice", 0)),
+                "quantity": float(o.get("quantity", 0)),
+                "isAlgo": True,
+                "status": o.get("status", "NEW (ALGO)")
+            })
+            
+        return jsonify({"status": "success", "orders": formatted_orders})
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Failed to fetch open orders: {str(e)}"}), 500
+
+@app.route("/api/cancel_order", methods=["POST"])
+def cancel_pending_order():
+    """Cancels a standard or algorithmic pending order by ID."""
+    try:
+        client = get_client()
+        data = request.get_json() or {}
+        symbol = data.get("symbol", "").upper()
+        order_id = data.get("orderId")
+        is_algo = data.get("isAlgo", False)
+        
+        if not symbol or not order_id:
+            return jsonify({"status": "error", "message": "Symbol and orderId are required."}), 400
+            
+        if is_algo:
+            result = client.cancel_algo_order(symbol, order_id)
+        else:
+            result = client.cancel_order(symbol, order_id)
+            
+        return jsonify({"status": "success", "message": "Order cancelled successfully.", "data": result})
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Failed to cancel order: {str(e)}"}), 500
+
 def open_browser():
     """Autolaunches the user's default browser to localhost."""
     webbrowser.open("http://127.0.0.1:5000")
