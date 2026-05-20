@@ -89,6 +89,14 @@ class BinanceClient:
             return data
         except requests.HTTPError as e:
             logger.error("HTTP error: %s | body: %s", e, e.response.text)
+            try:
+                err_json = e.response.json()
+                if "msg" in err_json:
+                    msg = err_json["msg"]
+                    code = err_json.get("code", "N/A")
+                    raise Exception(f"Exchange rejected order: {msg} (Code {code})") from e
+            except (ValueError, TypeError, KeyError):
+                pass
             raise
         except requests.RequestException as e:
             logger.error("Network error: %s", e)
